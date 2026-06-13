@@ -33,4 +33,11 @@ urlpatterns = [
     path('mobile/library/', views.MobileLibraryView.as_view(), name='mobile-library'),
     path('mobile/equipment/', views.MobileEquipmentView.as_view(), name='mobile-equipment'),
     path('mobile/notifications/<int:student_id>/', views.MobileNotificationsView.as_view(), name='mobile-notifications'),
+    
+    # ========== QUIZ SYSTEM URLs ==========
+    path('quizzes/', views.QuizListView.as_view(), name='quiz-list'),
+    path('quiz/lesson/<int:lesson_id>/', views.LessonQuizView.as_view(), name='lesson-quiz'),
+    path('quiz/start/', views.StartQuizView.as_view(), name='start-quiz'),
+    path('quiz/submit/', views.SubmitQuizView.as_view(), name='submit-quiz'),
+    path('quiz/result/<int:attempt_id>/', views.QuizResultView.as_view(), name='quiz-result'),
 ]

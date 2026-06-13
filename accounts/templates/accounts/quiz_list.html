@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Quizzes - Theta Tutorial Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .page-title {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .quiz-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .quiz-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .quiz-title {
+            font-size: 1.3em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .quiz-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .quiz-meta {
+            display: flex;
+            justify-content: space-between;
+            color: #888;
+            font-size: 0.85em;
+            margin-bottom: 15px;
+        }
+
+        .take-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1em;
+        }
+
+        .take-btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 Theta Tutorial Center</h1>
+        <div class="nav-links">
+            <a href="{% url 'student_portal' %}">My Portal</a>
+            <a href="{% url 'quiz_list' %}">Quizzes</a>
+            <a href="{% url 'student_logout_action' %}">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1 class="page-title">📝 Available Quizzes</h1>
+        
+        <div class="quiz-grid" id="quizGrid">
+            <div class="loading">Loading quizzes...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadQuizzes() {
+            try {
+                const response = await fetch('/api/quizzes/');
+                const data = await response.json();
+                
+                const grid = document.getElementById('quizGrid');
+                
+                if (!data.results || data.results.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center;">No quizzes available yet.</p>';
+                    return;
+                }
+                
+                let html = '';
+                for (const quiz of data.results) {
+                    const questionCount = quiz.questions ? quiz.questions.length : 0;
+                    html += `
+                        <div class="quiz-card" onclick="startQuiz(${quiz.id})">
+                            <h3 class="quiz-title">${escapeHtml(quiz.title)}</h3>
+                            <p class="quiz-description">${escapeHtml(quiz.description)}</p>
+                            <div class="quiz-meta">
+                                <span>📋 ${questionCount} questions</span>
+                                <span>⏱️ ${quiz.time_limit_minutes} minutes</span>
+                                <span>🎯 Pass: ${quiz.passing_score}%</span>
+                            </div>
+                            <button class="take-btn">Start Quiz →</button>
+                        </div>
+                    `;
+                }
+                grid.innerHTML = html;
+            } catch (error) {
+                document.getElementById('quizGrid').innerHTML = '<p>Error loading quizzes.</p>';
+            }
+        }
+        
+        function startQuiz(quizId) {
+            window.location.href = `/take-quiz/${quizId}/`;
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        loadQuizzes();
+    </script>
+</body>
+</html>

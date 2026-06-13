@@ -9,7 +9,9 @@ from rest_framework.views import APIView
 from django.utils import timezone
 import django
 from .models import Student, Subject, Lesson, Grade, StudentProgress, QuizScore, StudentActivity, Certificate
+from .models import Quiz, Question, Choice, QuizAttempt, StudentAnswer
 from .serializers import LessonSerializer, StudentSerializer, StudentProgressSerializer, QuizScoreSerializer, CertificateSerializer
+from .serializers import QuizSerializer, QuizAttemptSerializer
 
 # Simple test view
 def test_progress(request):
@@ -125,6 +127,7 @@ class SubmitQuizScoreView(APIView):
             quiz_score = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 # ========== CERTIFICATE VIEWS ==========
 
 class StudentCertificatesView(generics.ListAPIView):
@@ -194,7 +197,6 @@ class SendCertificateEmailView(APIView):
         
         try:
             certificate = Certificate.objects.get(id=certificate_id)
-            # Email sending logic here
             return Response({'message': f'Certificate email sent to {certificate.student.email}'})
         except Certificate.DoesNotExist:
             return Response({'error': 'Certificate not found'}, status=404)
@@ -205,7 +207,156 @@ class SendProgressReportView(APIView):
         
         try:
             student = Student.objects.get(id=student_id)
-            # Email sending logic here
             return Response({'message': f'Progress report sent to {student.email}'})
         except Student.DoesNotExist:
             return Response({'error': 'Student not found'}, status=404)
+
+# ========== QUIZ SYSTEM VIEWS ==========
+
+class QuizListView(generics.ListAPIView):
+    queryset = Quiz.objects.filter(is_active=True)
+    serializer_class = QuizSerializer
+
+class LessonQuizView(APIView):
+    def get(self, request, lesson_id):
+        try:
+            quiz = Quiz.objects.get(lesson_id=lesson_id, is_active=True)
+            serializer = QuizSerializer(quiz)
+            return Response(serializer.data)
+        except Quiz.DoesNotExist:
+            return Response({'error': 'No quiz available for this lesson'}, status=404)
+
+class StartQuizView(APIView):
+    def post(self, request):
+        student_id = request.data.get('student_id')
+        quiz_id = request.data.get('quiz_id')
+        
+        existing_attempt = QuizAttempt.objects.filter(
+            student_id=student_id, 
+            quiz_id=quiz_id, 
+            completed_at__isnull=True
+        ).first()
+        
+        if existing_attempt:
+            return Response({
+                'attempt_id': existing_attempt.id,
+                'message': 'Continuing existing attempt'
+            })
+        
+        attempt = QuizAttempt.objects.create(
+            student_id=student_id,
+            quiz_id=quiz_id
+        )
+        
+        return Response({
+            'attempt_id': attempt.id,
+            'message': 'Quiz started successfully'
+        })
+
+class SubmitQuizView(APIView):
+    def post(self, request):
+        attempt_id = request.data.get('attempt_id')
+        answers = request.data.get('answers', [])
+        
+        try:
+            attempt = QuizAttempt.objects.get(id=attempt_id)
+            quiz = attempt.quiz
+            total_points = 0
+            earned_points = 0
+            
+            for answer_data in answers:
+                question_id = answer_data.get('question_id')
+                choice_id = answer_data.get('choice_id')
+                answer_text = answer_data.get('answer_text', '')
+                
+                question = Question.objects.get(id=question_id)
+                total_points += question.points
+                
+                is_correct = False
+                points_earned = 0
+                
+                if question.question_type in ['multiple_choice', 'true_false'] and choice_id:
+                    choice = Choice.objects.get(id=choice_id)
+                    is_correct = choice.is_correct
+                    if is_correct:
+                        points_earned = question.points
+                        earned_points += points_earned
+                    
+                    StudentAnswer.objects.create(
+                        attempt=attempt,
+                        question=question,
+                        selected_choice=choice,
+                        is_correct=is_correct,
+                        points_earned=points_earned
+                    )
+                elif question.question_type == 'short_answer':
+                    correct_answer = question.choices.filter(is_correct=True).first()
+                    if correct_answer and answer_text.lower().strip() == correct_answer.choice_text.lower().strip():
+                        is_correct = True
+                        points_earned = question.points
+                        earned_points += points_earned
+                    
+                    StudentAnswer.objects.create(
+                        attempt=attempt,
+                        question=question,
+                        answer_text=answer_text,
+                        is_correct=is_correct,
+                        points_earned=points_earned
+                    )
+            
+            percentage = int((earned_points / total_points) * 100) if total_points > 0 else 0
+            passed = percentage >= quiz.passing_score
+            
+            attempt.score = earned_points
+            attempt.total_points = total_points
+            attempt.percentage = percentage
+            attempt.passed = passed
+            attempt.completed_at = timezone.now()
+            attempt.save()
+            
+            if passed:
+                progress, _ = StudentProgress.objects.get_or_create(
+                    student_id=attempt.student_id,
+                    lesson_id=quiz.lesson_id
+                )
+                if progress.progress_percentage < 100:
+                    progress.progress_percentage = 100
+                    progress.status = 'completed'
+                    progress.completed_at = timezone.now()
+                    progress.save()
+            
+            return Response({
+                'attempt_id': attempt.id,
+                'score': earned_points,
+                'total_points': total_points,
+                'percentage': percentage,
+                'passed': passed,
+                'message': 'Quiz submitted successfully!'
+            })
+        except QuizAttempt.DoesNotExist:
+            return Response({'error': 'Attempt not found'}, status=404)
+
+class QuizResultView(APIView):
+    def get(self, request, attempt_id):
+        try:
+            attempt = QuizAttempt.objects.get(id=attempt_id)
+            serializer = QuizAttemptSerializer(attempt)
+            
+            answers = StudentAnswer.objects.filter(attempt=attempt)
+            answers_data = []
+            for answer in answers:
+                answers_data.append({
+                    'question_id': answer.question.id,
+                    'question_text': answer.question.question_text,
+                    'is_correct': answer.is_correct,
+                    'points_earned': answer.points_earned,
+                    'selected_choice': answer.selected_choice.choice_text if answer.selected_choice else None,
+                    'correct_answer': answer.question.choices.filter(is_correct=True).first().choice_text if answer.question.choices.filter(is_correct=True).exists() else None
+                })
+            
+            return Response({
+                'attempt': serializer.data,
+                'answers': answers_data
+            })
+        except QuizAttempt.DoesNotExist:
+            return Response({'error': 'Attempt not found'}, status=404)

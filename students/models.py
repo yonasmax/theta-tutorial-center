@@ -205,3 +205,69 @@ class Certificate(models.Model):
     
     def __str__(self):
         return f"{self.student.name} - {self.get_certificate_type_display()} - {self.certificate_number}"
+# ========== QUIZ SYSTEM MODELS ==========
+
+class Quiz(models.Model):
+    """Represents a quiz for a lesson"""
+    lesson = models.OneToOneField(Lesson, on_delete=models.CASCADE, related_name='quiz')
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    time_limit_minutes = models.IntegerField(default=30)
+    passing_score = models.IntegerField(default=70)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Quiz: {self.title}"
+
+class Question(models.Model):
+    """Represents a question in a quiz"""
+    QUESTION_TYPES = [
+        ('multiple_choice', 'Multiple Choice'),
+        ('true_false', 'True/False'),
+        ('short_answer', 'Short Answer'),
+    ]
+    
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    question_text = models.TextField()
+    question_type = models.CharField(max_length=20, choices=QUESTION_TYPES, default='multiple_choice')
+    points = models.IntegerField(default=10)
+    order = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return f"Q{self.order}: {self.question_text[:50]}"
+
+class Choice(models.Model):
+    """Represents a choice for multiple choice questions"""
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
+    choice_text = models.CharField(max_length=200)
+    is_correct = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.choice_text
+
+class QuizAttempt(models.Model):
+    """Tracks a student's attempt at a quiz"""
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='quiz_attempts')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='attempts')
+    score = models.IntegerField(default=0)
+    total_points = models.IntegerField(default=0)
+    percentage = models.IntegerField(default=0)
+    passed = models.BooleanField(default=False)
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.student.name} - {self.quiz.title} - {self.percentage}%"
+
+class StudentAnswer(models.Model):
+    """Stores individual answers for each question"""
+    attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE, related_name='answers')
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    selected_choice = models.ForeignKey(Choice, on_delete=models.SET_NULL, null=True, blank=True)
+    answer_text = models.TextField(blank=True)
+    is_correct = models.BooleanField(default=False)
+    points_earned = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return f"Answer for Q{self.question.id}: {'Correct' if self.is_correct else 'Incorrect'}"
