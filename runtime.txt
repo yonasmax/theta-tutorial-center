@@ -1,0 +1,13 @@
+notepad render.yaml
+services:
+  - type: web
+    name: theta-tutorial-center
+    runtime: python
+    buildCommand: ./build.sh
+    startCommand: gunicorn theta_backend.wsgi:application
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+    plan: free

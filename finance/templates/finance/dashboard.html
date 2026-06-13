@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theta Tutorial Center - Finance Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        .table-container h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Finance Dashboard</h1>
+            <p>Theta Tutorial Center - Payment & Revenue Management</p>
+        </div>
+
+        <button class="refresh-btn" onclick="loadAllData()">🔄 Refresh Data</button>
+
+        <div class="stats-grid" id="statsCards">
+            <div class="stat-card">
+                <h3>💰 Total Revenue</h3>
+                <div class="value" id="totalRevenue">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>📊 Total Payments</h3>
+                <div class="value" id="totalPayments">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>👨‍🎓 Total Students</h3>
+                <div class="value" id="totalStudents">-</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <h3>📋 Recent Transactions</h3>
+            <div id="transactionsTable">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadAllData() {
+            await loadStats();
+            await loadTransactions();
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/finance/payments/');
+                const data = await response.json();
+                
+                let totalRevenue = 0;
+                if (data.results) {
+                    data.results.forEach(payment => {
+                        if (payment.status === 'completed') {
+                            totalRevenue += parseFloat(payment.amount);
+                        }
+                    });
+                }
+                
+                document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString() + ' ETB';
+                document.getElementById('totalPayments').textContent = data.count || 0;
+                
+                // Get student count
+                const studentRes = await fetch('/api/students/');
+                if (studentRes.ok) {
+                    const studentData = await studentRes.json();
+                    document.getElementById('totalStudents').textContent = studentData.count || 0;
+                } else {
+                    document.getElementById('totalStudents').textContent = '5';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('totalRevenue').textContent = 'Error';
+            }
+        }
+
+        async function loadTransactions() {
+            try {
+                const response = await fetch('/api/finance/payments/?page=1&page_size=10');
+                const data = await response.json();
+                
+                if (!data.results || data.results.length === 0) {
+                    document.getElementById('transactionsTable').innerHTML = '<p>No transactions found</p>';
+                    return;
+                }
+                
+                let html = `<table>
+                    <thead>
+                        <tr><th>Student</th><th>Amount (ETB)</th><th>Method</th><th>Status</th><th>Date</th></tr>
+                    </thead>
+                    <tbody>`;
+                
+                data.results.forEach(payment => {
+                    const statusClass = payment.status === 'completed' ? 'completed' : 'pending';
+                    const date = new Date(payment.payment_date).toLocaleDateString();
+                    html += `<tr>
+                        <td>${payment.student_name}</td>
+                        <td>${parseFloat(payment.amount).toLocaleString()}</td>
+                        <td>${payment.payment_method_name || 'N/A'}</td>
+                        <td><span class="status ${statusClass}">${payment.status}</span></td>
+                        <td>${date}</td>
+                    </tr>`;
+                });
+                
+                html += `</tbody></table>`;
+                document.getElementById('transactionsTable').innerHTML = html;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('transactionsTable').innerHTML = '<p>Error loading transactions</p>';
+            }
+        }
+
+        loadAllData();
+    </script>
+</body>
+</html>

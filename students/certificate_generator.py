@@ -1,0 +1,144 @@
+import os
+from datetime import datetime
+
+def generate_certificate(student_name, certificate_type, course_name, certificate_number):
+    """Generate an HTML certificate"""
+    
+    filename = f"certificates/certificate_{certificate_number}.html"
+    os.makedirs('certificates', exist_ok=True)
+    
+    html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Certificate of Achievement</title>
+    <style>
+        @media print {{
+            body {{
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }}
+            .no-print {{
+                display: none;
+            }}
+        }}
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+        body {{
+            font-family: 'Georgia', serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f0f0;
+            padding: 20px;
+        }}
+        .certificate {{
+            width: 900px;
+            height: 600px;
+            background: linear-gradient(135deg, #fff9e6 0%, #fff 100%);
+            border: 15px solid #667eea;
+            border-radius: 20px;
+            position: relative;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }}
+        .certificate::before {{
+            content: "";
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 2px solid #764ba2;
+            border-radius: 10px;
+            pointer-events: none;
+        }}
+        h1 {{
+            font-size: 42px;
+            color: #667eea;
+            margin-top: 60px;
+            letter-spacing: 2px;
+        }}
+        .subtitle {{
+            font-size: 24px;
+            color: #764ba2;
+            margin: 20px 0;
+        }}
+        .student-name {{
+            font-size: 48px;
+            color: #333;
+            margin: 30px 0;
+            font-weight: bold;
+            border-bottom: 2px solid #667eea;
+            display: inline-block;
+            padding: 0 20px;
+        }}
+        .course {{
+            font-size: 28px;
+            color: #667eea;
+            margin: 30px 0;
+        }}
+        .date {{
+            font-size: 14px;
+            color: #666;
+            margin-top: 40px;
+        }}
+        .cert-number {{
+            font-size: 10px;
+            color: #999;
+            margin-top: 20px;
+        }}
+        .signature {{
+            margin-top: 40px;
+            border-top: 1px solid #ccc;
+            display: inline-block;
+            padding-top: 10px;
+            width: 200px;
+        }}
+        .no-print {{
+            margin-top: 20px;
+            text-align: center;
+        }}
+        button {{
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }}
+        button:hover {{
+            background: #764ba2;
+        }}
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <h1>THETA TUTORIAL CENTER</h1>
+        <div class="subtitle">Certificate of Achievement</div>
+        <div class="student-name">{student_name}</div>
+        <div class="course">for completing</div>
+        <div class="course"><strong>{certificate_type}</strong> - {course_name}</div>
+        <div class="date">Issued on: {datetime.now().strftime("%B %d, %Y")}</div>
+        <div class="cert-number">Certificate No: {certificate_number}</div>
+        <div class="signature">Director</div>
+    </div>
+    <div class="no-print">
+        <button onclick="window.print()">🖨️ Print Certificate</button>
+        <button onclick="window.close()">Close</button>
+    </div>
+</body>
+</html>
+    """
+    
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    
+    return filename

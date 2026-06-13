@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theta Tutorial Center - Search Learning Materials</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        /* Search Box */
+        .search-box {
+            background: white;
+            border-radius: 50px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 25px;
+            font-size: 1.1em;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 1em;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .filter-select:focus {
+            border-color: #667eea;
+        }
+
+        .reset-button {
+            padding: 12px 25px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reset-button:hover {
+            background: #ff3838;
+            transform: translateY(-2px);
+        }
+
+        /* Stats */
+        .stats {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .results-count {
+            font-size: 1.1em;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .loading {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* Results Grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .lesson-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content-type {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .content-type.video {
+            background: #e74c3c20;
+            color: #e74c3c;
+        }
+
+        .content-type.quiz {
+            background: #f39c1220;
+            color: #f39c12;
+        }
+
+        .content-type.article {
+            background: #2ecc7120;
+            color: #2ecc71;
+        }
+
+        .lesson-title {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .lesson-topic {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .lesson-description {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .lesson-grade {
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 5px;
+        }
+
+        .lesson-subject {
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 5px;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .page-btn {
+            padding: 10px 18px;
+            background: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .page-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .page-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+        }
+
+        .no-results h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .no-results p {
+            color: #888;
+        }
+
+        /* Error Message */
+        .error-message {
+            background: #ff4757;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Theta Tutorial Center</h1>
+            <p>Search and discover learning materials for Grades 9-12</p>
+        </div>
+
+        <div class="search-box">
+            <div class="search-input-wrapper">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by title, topic, or description..." autocomplete="off">
+                <button id="searchBtn" class="search-button">🔍 Search</button>
+            </div>
+            <div class="filters">
+                <select id="gradeFilter" class="filter-select">
+                    <option value="">All Grades</option>
+                </select>
+                <select id="subjectFilter" class="filter-select">
+                    <option value="">All Subjects</option>
+                </select>
+                <select id="typeFilter" class="filter-select">
+                    <option value="">All Content Types</option>
+                    <option value="video">📹 Video</option>
+                    <option value="quiz">📝 Quiz</option>
+                    <option value="article">📄 Article</option>
+                </select>
+                <button id="resetBtn" class="reset-button">Reset All</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="results-count" id="resultsCount">Loading...</div>
+            <div id="loadingIndicator" class="loading"></div>
+        </div>
+
+        <div id="resultsContainer" class="results-grid">
+            <div style="text-align: center; grid-column: 1/-1;">Loading lessons...</div>
+        </div>
+
+        <div id="paginationContainer" class="pagination"></div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let totalPages = 1;
+        
+        // Load filter options on page load
+        async function loadFilterOptions() {
+            try {
+                const response = await fetch('/api/filter-options/');
+                const data = await response.json();
+                
+                // Populate grade filter
+                const gradeSelect = document.getElementById('gradeFilter');
+                data.grades.forEach(grade => {
+                    const option = document.createElement('option');
+                    option.value = grade;
+                    option.textContent = grade;
+                    gradeSelect.appendChild(option);
+                });
+                
+                // Populate subject filter
+                const subjectSelect = document.getElementById('subjectFilter');
+                data.subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject;
+                    option.textContent = subject;
+                    subjectSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading filters:', error);
+            }
+        }
+        
+        // Search lessons
+        async function searchLessons(page = 1) {
+            const searchInput = document.getElementById('searchInput').value;
+            const grade = document.getElementById('gradeFilter').value;
+            const subject = document.getElementById('subjectFilter').value;
+            const contentType = document.getElementById('typeFilter').value;
+            
+            // Build URL
+            let url = `/api/search/?page=${page}`;
+            if (searchInput) url += `&search=${encodeURIComponent(searchInput)}`;
+            if (grade) url += `&grade=${encodeURIComponent(grade)}`;
+            if (subject) url += `&subject=${encodeURIComponent(subject)}`;
+            if (contentType) url += `&content_type=${contentType}`;
+            
+            try {
+                document.getElementById('loadingIndicator').textContent = 'Loading...';
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                // Update results count
+                document.getElementById('resultsCount').textContent = `Found ${data.count} results`;
+                document.getElementById('loadingIndicator').textContent = '';
+                
+                // Render results
+                renderResults(data.results);
+                
+                // Render pagination
+                totalPages = Math.ceil(data.count / 10);
+                renderPagination(page, totalPages);
+                
+                currentPage = page;
+            } catch (error) {
+                console.error('Error searching:', error);
+                document.getElementById('resultsContainer').innerHTML = `
+                    <div class="error-message" style="grid-column: 1/-1;">
+                        ❌ Error loading results. Please make sure the server is running.
+                    </div>
+                `;
+            }
+        }
+        
+        // Render results
+        function renderResults(lessons) {
+            const container = document.getElementById('resultsContainer');
+            
+            if (!lessons || lessons.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results" style="grid-column: 1/-1;">
+                        <h3>🔍 No results found</h3>
+                        <p>Try adjusting your search or filters</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = lessons.map(lesson => `
+                <div class="lesson-card">
+                    <div class="content-type ${lesson.content_type}">
+                        ${lesson.content_type === 'video' ? '📹 VIDEO' : lesson.content_type === 'quiz' ? '📝 QUIZ' : '📄 ARTICLE'}
+                    </div>
+                    <h3 class="lesson-title">${escapeHtml(lesson.title)}</h3>
+                    <div class="lesson-topic">📖 Topic: ${escapeHtml(lesson.topic)}</div>
+                    <div class="lesson-description">${escapeHtml(lesson.description || 'No description available')}</div>
+                    <div class="lesson-meta">
+                        <span class="lesson-grade">🎓 ${escapeHtml(lesson.grade_level)}</span>
+                        <span class="lesson-subject">📚 ${escapeHtml(lesson.subject_name)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Render pagination
+        function renderPagination(current, total) {
+            const container = document.getElementById('paginationContainer');
+            
+            if (total <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            
+            // Previous button
+            html += `<button class="page-btn" onclick="changePage(${current - 1})" ${current === 1 ? 'disabled' : ''}>← Previous</button>`;
+            
+            // Page numbers
+            for (let i = 1; i <= Math.min(total, 5); i++) {
+                html += `<button class="page-btn ${i === current ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+            }
+            
+            if (total > 5) {
+                html += `<span style="padding: 10px;">...</span>`;
+                html += `<button class="page-btn" onclick="changePage(${total})">${total}</button>`;
+            }
+            
+            // Next button
+            html += `<button class="page-btn" onclick="changePage(${current + 1})" ${current === total ? 'disabled' : ''}>Next →</button>`;
+            
+            container.innerHTML = html;
+        }
+        
+        // Change page
+        function changePage(page) {
+            if (page < 1 || page > totalPages) return;
+            searchLessons(page);
+        }
+        
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Event listeners
+        document.getElementById('searchBtn').addEventListener('click', () => searchLessons(1));
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('gradeFilter').value = '';
+            document.getElementById('subjectFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            searchLessons(1);
+        });
+        
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchLessons(1);
+        });
+        
+        document.getElementById('gradeFilter').addEventListener('change', () => searchLessons(1));
+        document.getElementById('subjectFilter').addEventListener('change', () => searchLessons(1));
+        document.getElementById('typeFilter').addEventListener('change', () => searchLessons(1));
+        
+        // Initial load
+        loadFilterOptions();
+        searchLessons(1);
+    </script>
+</body>
+</html>
