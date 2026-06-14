@@ -64,9 +64,11 @@ class Lesson(models.Model):
         choices=[('video', 'Video'), ('quiz', 'Quiz'), ('article', 'Article')]
     )
     description = models.TextField(blank=True)
+    video_url = models.URLField(blank=True, null=True, help_text="YouTube or Vimeo video URL")  # ADDED THIS FIELD
     
     def __str__(self):
         return self.title
+
 # ========== STUDENT PROGRESS TRACKING MODELS ==========
 
 class StudentProgress(models.Model):
@@ -80,64 +82,6 @@ class StudentProgress(models.Model):
     
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='progress')
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='student_progress')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
-    progress_percentage = models.IntegerField(default=0)  # 0-100
-    started_at = models.DateTimeField(auto_now_add=True)
-    last_accessed = models.DateTimeField(auto_now=True)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    
-    class Meta:
-        unique_together = ['student', 'lesson']  # One record per student per lesson
-        ordering = ['-last_accessed']
-    
-    def __str__(self):
-        return f"{self.student.name} - {self.lesson.title} ({self.status})"
-
-class QuizScore(models.Model):
-    """Tracks student quiz scores"""
-    
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='quiz_scores')
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='quiz_scores')
-    score = models.IntegerField()  # Score out of 100
-    total_questions = models.IntegerField()
-    correct_answers = models.IntegerField()
-    taken_at = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f"{self.student.name} - {self.lesson.title}: {self.score}%"
-
-class StudentActivity(models.Model):
-    """Tracks general student activity (login, search, etc.)"""
-    
-    ACTIVITY_TYPES = [
-        ('login', 'Login'),
-        ('search', 'Search'),
-        ('view_lesson', 'Viewed Lesson'),
-        ('take_quiz', 'Took Quiz'),
-        ('borrow_book', 'Borrowed Book'),
-        ('make_payment', 'Made Payment'),
-    ]
-    
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='activities')
-    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES)
-    details = models.TextField(blank=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return f"{self.student.name} - {self.activity_type} at {self.timestamp}"
-# ========== STUDENT PROGRESS TRACKING MODELS ==========
-
-class StudentProgress(models.Model):
-    """Tracks which lessons a student has completed"""
-    
-    STATUS_CHOICES = [
-        ('not_started', 'Not Started'),
-        ('in_progress', 'In Progress'),
-        ('completed', 'Completed'),
-    ]
-    
-    student = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='progress')
-    lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE, related_name='student_progress')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
     progress_percentage = models.IntegerField(default=0)
     started_at = models.DateTimeField(auto_now_add=True)
@@ -154,8 +98,8 @@ class StudentProgress(models.Model):
 class QuizScore(models.Model):
     """Tracks student quiz scores"""
     
-    student = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='quiz_scores')
-    lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE, related_name='quiz_scores')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='quiz_scores')
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='quiz_scores')
     score = models.IntegerField()
     total_questions = models.IntegerField()
     correct_answers = models.IntegerField()
@@ -176,13 +120,14 @@ class StudentActivity(models.Model):
         ('make_payment', 'Made Payment'),
     ]
     
-    student = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='activities')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='activities')
     activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPES)
     details = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"{self.student.name} - {self.activity_type}"
+
 # ========== CERTIFICATE MODEL ==========
 
 class Certificate(models.Model):
@@ -195,9 +140,9 @@ class Certificate(models.Model):
         ('excellence', 'Excellence Award'),
     ]
     
-    student = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='certificates')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='certificates')
     certificate_type = models.CharField(max_length=30, choices=CERTIFICATE_TYPES)
-    lesson = models.ForeignKey('Lesson', on_delete=models.SET_NULL, null=True, blank=True)
+    lesson = models.ForeignKey(Lesson, on_delete=models.SET_NULL, null=True, blank=True)
     certificate_number = models.CharField(max_length=50, unique=True)
     issued_date = models.DateTimeField(auto_now_add=True)
     pdf_file = models.FileField(upload_to='certificates/', blank=True, null=True)
@@ -205,6 +150,7 @@ class Certificate(models.Model):
     
     def __str__(self):
         return f"{self.student.name} - {self.get_certificate_type_display()} - {self.certificate_number}"
+
 # ========== QUIZ SYSTEM MODELS ==========
 
 class Quiz(models.Model):
