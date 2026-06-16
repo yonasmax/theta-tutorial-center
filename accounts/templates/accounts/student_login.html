@@ -4,155 +4,316 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Login - Theta Tutorial Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --success: #48bb78;
+            --danger: #fc8181;
+            --dark: #1a202c;
+            --gray: #718096;
+            --light-gray: #f7fafc;
+            --white: #ffffff;
+            --shadow: 0 10px 40px rgba(0,0,0,0.08);
+            --radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f0f4f8;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .login-container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            width: 400px;
-            padding: 40px;
-            animation: fadeIn 0.5s ease-in;
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 48px 40px;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            animation: fadeInUp 0.6s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .logo {
+        .login-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
         }
 
-        .logo h1 {
-            color: #667eea;
+        .login-header .logo {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .login-header h1 {
             font-size: 28px;
+            font-weight: 800;
+            color: var(--dark);
+            letter-spacing: -0.5px;
         }
 
-        .logo p {
-            color: #888;
-            font-size: 14px;
-            margin-top: 5px;
+        .login-header h1 span {
+            color: var(--primary);
+        }
+
+        .login-header p {
+            color: var(--gray);
+            font-size: 15px;
+            margin-top: 4px;
         }
 
         .form-group {
             margin-bottom: 20px;
         }
 
-        label {
+        .form-group label {
             display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            font-weight: 600;
             font-size: 14px;
-            transition: all 0.3s;
+            color: var(--dark);
+            margin-bottom: 6px;
         }
 
-        input:focus {
+        .form-group label i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: var(--light-gray);
+            border-radius: 12px;
+            padding: 0 16px;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-wrapper i {
+            color: var(--gray);
+            font-size: 16px;
+        }
+
+        .input-wrapper input {
+            border: none;
+            background: transparent;
+            padding: 14px 14px;
+            font-size: 15px;
+            font-family: inherit;
+            width: 100%;
             outline: none;
-            border-color: #667eea;
+            color: var(--dark);
+        }
+
+        .input-wrapper input::placeholder {
+            color: #a0aec0;
         }
 
         .login-btn {
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
         }
 
         .login-btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn i {
+            font-size: 16px;
         }
 
         .message {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            display: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            display: block;
+            background: #fed7d7;
+            color: #9b2c2c;
         }
 
         .message.success {
-            background: #d4edda;
-            color: #155724;
-            display: block;
+            background: #c6f6d5;
+            color: #22543d;
         }
 
-        .register-link {
+        .message i {
+            font-size: 18px;
+        }
+
+        .login-footer {
             text-align: center;
-            margin-top: 20px;
-            color: #888;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
         }
 
-        .register-link a {
-            color: #667eea;
+        .login-footer p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .login-footer a {
+            color: var(--primary);
             text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Demo Credentials */
+        .demo-credentials {
+            background: var(--light-gray);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-top: 20px;
+        }
+
+        .demo-credentials p {
+            font-size: 13px;
+            color: var(--gray);
+            margin-bottom: 6px;
+        }
+
+        .demo-credentials .cred {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 4px 0;
+        }
+
+        .demo-credentials .cred span:first-child {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .demo-credentials .cred span:last-child {
+            color: var(--gray);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 32px 24px;
+            }
+            .login-header h1 { font-size: 24px; }
+            .login-header .logo { font-size: 40px; }
         }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <div class="logo">
-            <h1>📚 Theta Tutorial Center</h1>
+        <div class="login-header">
+            <span class="logo">📚</span>
+            <h1>Theta <span>Tutorial</span></h1>
             <p>Student Login Portal</p>
         </div>
-
-        <form method="POST" action="{% url 'student_login_action' %}">
-            {% csrf_token %}
-            <div class="form-group">
-                <label>Student Name</label>
-                <input type="text" name="username" placeholder="Enter your full name" required>
-            </div>
-            <div class="form-group">
-                <label>Student ID / Password</label>
-                <input type="password" name="password" placeholder="Enter your student ID" required>
-            </div>
-            <button type="submit" class="login-btn">Login →</button>
-        </form>
 
         {% if messages %}
             {% for message in messages %}
                 <div class="message {{ message.tags }}">
+                    <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %}"></i>
                     {{ message }}
                 </div>
             {% endfor %}
         {% endif %}
 
-        <div class="register-link">
+        <form method="POST" action="{% url 'student_login_action' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Student Name</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="username" placeholder="Enter your full name" required autocomplete="off">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-key"></i> Student ID / Password</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" placeholder="Enter your student ID or grade" required>
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+        </form>
+
+        <div class="demo-credentials">
+            <p><i class="fas fa-info-circle" style="color: var(--primary);"></i> Demo Credentials</p>
+            <div class="cred">
+                <span>Almaz Desta</span>
+                <span>Grade 10 or ID: 1</span>
+            </div>
+            <div class="cred">
+                <span>Biruk Tesfaye</span>
+                <span>Grade 11 or ID: 2</span>
+            </div>
+            <div class="cred">
+                <span>Chaltu Ahmed</span>
+                <span>Grade 12 or ID: 3</span>
+            </div>
+            <div class="cred">
+                <span>Dawit Mekonnen</span>
+                <span>Grade 9 or ID: 4</span>
+            </div>
+            <div class="cred">
+                <span>Eden Girma</span>
+                <span>Grade 10 or ID: 5</span>
+            </div>
+        </div>
+
+        <div class="login-footer">
             <p>New student? <a href="/admin/students/student/add/">Contact Admin</a></p>
         </div>
     </div>

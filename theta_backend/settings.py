@@ -102,3 +102,10 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': False,
 }
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'accounts/static',
+]
+# Media files (Profile pictures, uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

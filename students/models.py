@@ -19,6 +19,7 @@ class Student(models.Model):
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
     registered_date = models.DateTimeField(auto_now_add=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)  # ADDED THIS FIELD
     
     def __str__(self):
         return f"{self.name} - {self.grade}"
@@ -64,7 +65,7 @@ class Lesson(models.Model):
         choices=[('video', 'Video'), ('quiz', 'Quiz'), ('article', 'Article')]
     )
     description = models.TextField(blank=True)
-    video_url = models.URLField(blank=True, null=True, help_text="YouTube or Vimeo video URL")  # ADDED THIS FIELD
+    video_url = models.URLField(blank=True, null=True, help_text="YouTube or Vimeo video URL")
     
     def __str__(self):
         return self.title
