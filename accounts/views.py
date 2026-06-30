@@ -6,7 +6,7 @@ from django.db.models import Q
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from students.models import Student, Subject, Lesson, Grade
+from students.models import Student, Subject, Lesson, Grade, StudentProgress
 from .serializers import LessonSerializer
 
 def student_login(request):
@@ -81,10 +81,12 @@ class FilterOptionsView(APIView):
 
 def search_page(request):
     return render(request, 'accounts/search.html')
+
 def dashboard_page(request):
     return render(request, 'accounts/dashboard.html')
+
 from django.contrib.auth.models import User
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login as auth_login
 
 def student_login_page(request):
     return render(request, 'accounts/student_login.html')
@@ -98,13 +100,13 @@ def student_login_action(request):
         try:
             student = Student.objects.get(name=username)
             # Simple authentication - you can enhance this
-            if password == student.id or password == student.grade:
+            if str(password) == str(student.id) or str(password) == str(student.grade):
                 # Create or get user for Django auth
                 user, created = User.objects.get_or_create(
                     username=username,
                     defaults={'password': 'pbkdf2_sha256$dummy'}
                 )
-                login(request, user)
+                auth_login(request, user)
                 request.session['student_id'] = student.id
                 return redirect('student_portal')
             else:
@@ -125,7 +127,6 @@ def student_portal(request):
         return redirect('student_login_page')
     
     # Get student's lessons with progress
-    from students.models import Lesson, StudentProgress
     all_lessons = Lesson.objects.filter(grade__level=f"Grade {student.grade}")
     lessons_with_progress = []
     completed = 0
@@ -140,6 +141,7 @@ def student_portal(request):
             'title': lesson.title,
             'topic': lesson.topic,
             'progress': progress_percent,
+            'video_url': lesson.video_url,  # ADDED THIS LINE
         })
     
     total = all_lessons.count()
@@ -158,6 +160,7 @@ def student_portal(request):
 def student_logout_action(request):
     logout(request)
     return redirect('student_login_page')
+
 # ========== QUIZ UI VIEWS ==========
 
 def quiz_list(request):
@@ -175,3 +178,10 @@ def take_quiz(request, quiz_id):
         'quiz_id': quiz_id
     }
     return render(request, 'accounts/take_quiz.html', context)
+
+# ========== VIDEO LESSONS VIEW ==========
+
+def video_lessons(request):
+    if not request.user.is_authenticated:
+        return redirect('student_login_page')
+    return render(request, 'accounts/video_lessons.html')

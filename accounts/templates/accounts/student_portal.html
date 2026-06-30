@@ -52,7 +52,6 @@
             overflow: hidden;
         }
 
-        /* Axum Image Decoration */
         .axum-image {
             position: absolute;
             top: 10px;
@@ -89,7 +88,6 @@
             position: relative;
         }
 
-        /* ========== LOGO ========== */
         .logo-container {
             display: flex;
             align-items: center;
@@ -195,7 +193,6 @@
             box-shadow: var(--shadow-hover);
         }
 
-        /* Fasil Castle Decoration */
         .fasil-image {
             position: absolute;
             bottom: 10px;
@@ -215,7 +212,6 @@
             50% { transform: rotate(2deg) scale(1.03); }
         }
 
-        /* Obelisk Decoration */
         .obelisk-image {
             position: absolute;
             bottom: 10px;
@@ -293,21 +289,6 @@
             font-size: 13px;
             color: var(--gray);
             margin-top: 6px;
-        }
-
-        /* ========== WELCOME CARD ========== */
-        .welcome-card {
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: 20px 30px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(102, 126, 234, 0.08);
-        }
-
-        .welcome-card p {
-            color: var(--gray);
-            font-size: 14px;
         }
 
         /* ========== STATS GRID ========== */
@@ -557,6 +538,105 @@
             color: #4a5568;
         }
 
+        /* ========== VIDEO MODAL ========== */
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-modal-content {
+            background: #1a202c;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 90vh;
+            position: relative;
+        }
+
+        .video-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.3s;
+        }
+
+        .video-modal-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .video-modal-title {
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #000;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .video-actions .btn-close {
+            padding: 10px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .video-actions .btn-close:hover {
+            background: #5a67d8;
+        }
+
+        .video-actions .btn-complete {
+            padding: 10px 24px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .video-actions .btn-complete:hover {
+            background: #38a169;
+        }
+
         /* ========== FOOTER ========== */
         .ethiopian-footer {
             background: #1a202c;
@@ -727,6 +807,9 @@
             .footer-fasil, .footer-obelisk {
                 display: none;
             }
+            .video-modal-content {
+                padding: 20px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -887,9 +970,9 @@
                             <i class="fas fa-tag" style="color: var(--gray);"></i> {{ lesson.topic }}
                         </div>
                         {% if lesson.video_url %}
-                            <a href="{{ lesson.video_url }}" target="_blank" class="watch-video-btn">
+                            <button class="watch-video-btn" onclick="openVideo('{{ lesson.video_url }}', '{{ lesson.title }}')">
                                 <i class="fas fa-play"></i> Watch Video
-                            </a>
+                            </button>
                         {% else %}
                             <span class="no-video"><i class="fas fa-video-slash"></i> No video available</span>
                         {% endif %}
@@ -923,6 +1006,21 @@
                     No lessons assigned yet.
                 </p>
             {% endif %}
+        </div>
+    </div>
+
+    <!-- VIDEO MODAL -->
+    <div class="video-modal" id="videoModal">
+        <div class="video-modal-content">
+            <button class="video-modal-close" onclick="closeVideo()">×</button>
+            <h2 class="video-modal-title" id="videoTitle">Video Lesson</h2>
+            <div class="video-container">
+                <iframe id="videoIframe" src="" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+            </div>
+            <div class="video-actions">
+                <button class="btn-close" onclick="closeVideo()"><i class="fas fa-times"></i> Close</button>
+                <button class="btn-complete" onclick="markComplete()"><i class="fas fa-check"></i> Mark as Completed</button>
+            </div>
         </div>
     </div>
 
@@ -969,8 +1067,55 @@
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // All icons are loaded via CDN
+        // Open video in modal
+        function openVideo(videoUrl, videoTitle) {
+            document.getElementById('videoModal').style.display = 'flex';
+            document.getElementById('videoTitle').textContent = videoTitle || 'Video Lesson';
+            
+            // Convert to embed URL
+            let embedUrl = videoUrl;
+            if (videoUrl.includes('watch?v=')) {
+                embedUrl = videoUrl.replace('watch?v=', 'embed/');
+            } else if (videoUrl.includes('youtu.be/')) {
+                embedUrl = videoUrl.replace('youtu.be/', 'www.youtube.com/embed/');
+            }
+            
+            // Add autoplay
+            if (embedUrl.includes('?')) {
+                embedUrl += '&autoplay=1';
+            } else {
+                embedUrl += '?autoplay=1';
+            }
+            
+            document.getElementById('videoIframe').src = embedUrl;
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close video modal
+        function closeVideo() {
+            document.getElementById('videoModal').style.display = 'none';
+            document.getElementById('videoIframe').src = '';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Mark lesson as complete
+        function markComplete() {
+            alert('✅ Lesson marked as complete! Great job! 🎉');
+            closeVideo();
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeVideo();
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('videoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVideo();
+            }
         });
     </script>
 </body>

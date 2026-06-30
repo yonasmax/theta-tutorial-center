@@ -15,4 +15,5 @@ urlpatterns = [
     path('filter-options/', views.FilterOptionsView.as_view(), name='filter-options'),
     path('quiz-list/', views.quiz_list, name='quiz_list'),
     path('take-quiz/<int:quiz_id>/', views.take_quiz, name='take_quiz'),
+    path('video-lessons/', views.video_lessons, name='video_lessons'),  # ADDED THIS LINE
 ]
