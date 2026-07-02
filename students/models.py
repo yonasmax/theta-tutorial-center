@@ -219,3 +219,50 @@ class StudentAnswer(models.Model):
     
     def __str__(self):
         return f"Answer for Q{self.question.id}: {'Correct' if self.is_correct else 'Incorrect'}"
+
+# ========== NOTES MODEL ==========
+
+class Note(models.Model):
+    """Study notes for students"""
+    
+    SUBJECT_CHOICES = [
+        ('mathematics', 'Mathematics'),
+        ('physics', 'Physics'),
+        ('chemistry', 'Chemistry'),
+        ('biology', 'Biology'),
+        ('history', 'History'),
+        ('geography', 'Geography'),
+        ('english', 'English'),
+        ('amharic', 'Amharic'),
+        ('geez', 'Geez'),
+        ('civics', 'Civics'),
+        ('economics', 'Economics'),
+        ('other', 'Other'),
+    ]
+    
+    GRADE_CHOICES = [
+        ('9', 'Grade 9'),
+        ('10', 'Grade 10'),
+        ('11', 'Grade 11'),
+        ('12', 'Grade 12'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    subject = models.CharField(max_length=20, choices=SUBJECT_CHOICES)
+    grade = models.CharField(max_length=2, choices=GRADE_CHOICES)
+    topic = models.CharField(max_length=200)
+    content = models.TextField()
+    summary = models.TextField(blank=True)
+    pdf_file = models.FileField(upload_to='notes/pdfs/', blank=True, null=True)
+    image = models.ImageField(upload_to='notes/images/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_published = models.BooleanField(default=True)
+    view_count = models.IntegerField(default=0)
+    download_count = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return f"{self.title} - {self.get_grade_display()} ({self.get_subject_display()})"
+    
+    class Meta:
+        ordering = ['-created_at']

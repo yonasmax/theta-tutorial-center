@@ -1,0 +1,216 @@
+<!-- Amharic Bible Proverbs Footer -->
+<div class="proverbs-container">
+    <div class="proverb-content" id="amharicProverb">
+        <div class="proverb-text" id="proverbText">Loading...</div>
+        <div class="proverb-ref" id="proverbRef"></div>
+    </div>
+</div>
+
+<style>
+    .proverbs-container {
+        background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+        padding: 30px 20px;
+        text-align: center;
+        border-top: 3px solid #FCDD09;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .proverbs-container::before {
+        content: '✝';
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 40px;
+        color: #FCDD09;
+        opacity: 0.1;
+    }
+
+    .proverbs-container::after {
+        content: '✝';
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 40px;
+        color: #FCDD09;
+        opacity: 0.1;
+    }
+
+    .proverb-content {
+        max-width: 800px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .proverb-text {
+        font-size: 22px;
+        font-weight: 500;
+        color: #f7fafc;
+        font-family: 'Noto Sans Ethiopic', 'Segoe UI', sans-serif;
+        line-height: 1.8;
+        margin-bottom: 10px;
+        animation: fadeInOut 2s ease-in-out;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .proverb-ref {
+        font-size: 16px;
+        color: #FCDD09;
+        font-weight: 600;
+        letter-spacing: 2px;
+    }
+
+    .proverb-ornament {
+        color: #FCDD09;
+        font-size: 14px;
+        margin: 0 10px;
+        opacity: 0.6;
+    }
+
+    @keyframes fadeInOut {
+        0% { opacity: 0; transform: translateY(10px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Ethiopian flag colors decoration */
+    .proverbs-container .flag-stripes {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+
+    .proverbs-container .flag-stripes span {
+        display: inline-block;
+        width: 40px;
+        height: 4px;
+        border-radius: 5px;
+    }
+
+    .proverbs-container .flag-stripes .green { background: #078930; }
+    .proverbs-container .flag-stripes .yellow { background: #FCDD09; }
+    .proverbs-container .flag-stripes .red { background: #EF1C24; }
+
+    @media (max-width: 768px) {
+        .proverb-text {
+            font-size: 18px;
+        }
+        .proverb-ref {
+            font-size: 14px;
+        }
+        .proverbs-container::before,
+        .proverbs-container::after {
+            display: none;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .proverb-text {
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .proverb-ref {
+            font-size: 12px;
+        }
+    }
+</style>
+
+<script>
+    // Amharic Bible Proverbs
+    const amharicProverbs = [
+        {
+            text: 'ጥበብ መጀመሪያ ጥበብን አግኙ፤ በገዛ ንብረትህ ሁሉ አስተዋይነትን አግኙ።',
+            ref: 'ምሳሌ 4:7'
+        },
+        {
+            text: 'እግዚአብሔርን ፍራት የጥበብ መጀመሪያ ነው፤ ቅዱሳንን ማወቅ የማስተዋል መሠረት ነው።',
+            ref: 'ምሳሌ 9:10'
+        },
+        {
+            text: 'ልብህን ለጥበብ አዘንብል፤ ለማስተዋልም ጩኸትህን ከፍ አድርግ።',
+            ref: 'ምሳሌ 2:2'
+        },
+        {
+            text: 'ጥበብ በልብህ ውስጥ ትገባለች፤ እውቀትም ለነፍስህ መልካም ትሆናለች።',
+            ref: 'ምሳሌ 2:10'
+        },
+        {
+            text: 'ከጥበብ የሚገኘው ፍሬ ከወርቅ ይልቅ መልካም ነው፤ ትርፏም ከተመረጠ ብር ይልቅ ይበልጣል።',
+            ref: 'ምሳሌ 3:14'
+        },
+        {
+            text: 'ጥበብ ለሚያገኙአት ሁሉ የሕይወት ዛፍ ናት፤ የያዟትም ሁሉ ደስተኛ ናቸው።',
+            ref: 'ምሳሌ 3:18'
+        },
+        {
+            text: 'ጥበብን ተጠብቅ፤ ማስተዋልንም ጠብቅ፤ ከአፍህ እንዳትወጣ አድርግ።',
+            ref: 'ምሳሌ 4:21'
+        },
+        {
+            text: 'ጥበብን አትተው፤ ትጠብቅሃለች፤ ውደዳት፤ ትጠብቅሃለች።',
+            ref: 'ምሳሌ 4:6'
+        },
+        {
+            text: 'በጥበብ የተሞላ ሰው በጸጋ ይከበራል፤ በእውቀት የበለጸገ ሰውም ክብርን ያገኛል።',
+            ref: 'ምሳሌ 3:35'
+        },
+        {
+            text: 'ጥበብ ባለበት ጥበበኛ ይኖራል፤ እውቀትም በአስተዋይ ሰው ውስጥ ትገኛለች።',
+            ref: 'ምሳሌ 14:6'
+        },
+        {
+            text: 'ጥበብ ከሁሉ በላይ ዋና ናት፤ ስለዚህ ጥበብን አግኝ፤ በገዛ ንብረትህ ሁሉ አስተዋይነትን አግኝ።',
+            ref: 'ምሳሌ 4:7'
+        },
+        {
+            text: 'በጥበብ ዘንድ እግርህን ጠብቅ፤ መንገድህም ደህንነትን ያገኛል።',
+            ref: 'ምሳሌ 3:23'
+        },
+        {
+            text: 'ጥበብ በመንገድ ላይ ትጮኻለች፤ በአደባባይም ድምጿን ታሰማለች።',
+            ref: 'ምሳሌ 1:20'
+        },
+        {
+            text: 'የእግዚአብሔር ፍርሃት የጥበብ ትምህርት ነው፤ ትሕትና ከክብር በፊት ትሄዳለች።',
+            ref: 'ምሳሌ 15:33'
+        },
+        {
+            text: 'ጥበበኛ ልብ ትምህርትን ይቀበላል፤ ጥበበኛም ጆሮ ጥበብን ይፈልጋል።',
+            ref: 'ምሳሌ 18:15'
+        }
+    ];
+
+    let currentIndex = 0;
+
+    function displayProverb(index) {
+        const proverb = amharicProverbs[index];
+        const textElement = document.getElementById('proverbText');
+        const refElement = document.getElementById('proverbRef');
+        
+        // Fade out
+        textElement.style.opacity = '0';
+        refElement.style.opacity = '0';
+        
+        setTimeout(() => {
+            textElement.textContent = proverb.text;
+            refElement.textContent = proverb.ref;
+            textElement.style.opacity = '1';
+            refElement.style.opacity = '1';
+        }, 500);
+    }
+
+    function nextProverb() {
+        currentIndex = (currentIndex + 1) % amharicProverbs.length;
+        displayProverb(currentIndex);
+    }
+
+    // Initialize with first proverb
+    document.addEventListener('DOMContentLoaded', function() {
+        displayProverb(0);
+        // Change proverb every 8 seconds
+        setInterval(nextProverb, 8000);
+    });
+</script>

@@ -7,6 +7,10 @@ urlpatterns = [
     
     # Student URLs
     path('students/', views.StudentListView.as_view(), name='student-list'),
+    path('students/create/', views.StudentCreateView.as_view(), name='student-create'),
+    path('students/<int:pk>/', views.StudentDetailView.as_view(), name='student-detail'),
+    path('students/bulk-upload/', views.StudentBulkUploadView.as_view(), name='student-bulk-upload'),
+    path('students/stats/', views.StudentStatsView.as_view(), name='student-stats'),
     
     # Progress Tracking URLs
     path('progress/', views.StudentProgressListView.as_view(), name='progress-list'),
@@ -40,4 +44,19 @@ urlpatterns = [
     path('quiz/start/', views.StartQuizView.as_view(), name='start-quiz'),
     path('quiz/submit/', views.SubmitQuizView.as_view(), name='submit-quiz'),
     path('quiz/result/<int:attempt_id>/', views.QuizResultView.as_view(), name='quiz-result'),
+    
+    # ========== NOTES URLs ==========
+    path('notes/', views.NoteListView.as_view(), name='note-list'),
+    path('notes/<int:pk>/', views.NoteDetailView.as_view(), name='note-detail'),
+    path('notes/create/', views.NoteCreateView.as_view(), name='note-create'),
+    path('notes/update/<int:pk>/', views.NoteUpdateView.as_view(), name='note-update'),
+    path('notes/delete/<int:pk>/', views.NoteDeleteView.as_view(), name='note-delete'),
+    path('notes/stats/', views.NoteStatsView.as_view(), name='note-stats'),
+    
+    # ========== GRADE 10 URLs ==========
+    path('grade10/dashboard/<int:student_id>/', views.Grade10DashboardView.as_view(), name='grade10-dashboard'),
+    path('grade10/subjects/', views.Grade10SubjectsView.as_view(), name='grade10-subjects'),
+    path('grade10/lessons/', views.Grade10LessonsView.as_view(), name='grade10-lessons'),
+    path('grade10/notes/', views.Grade10NotesView.as_view(), name='grade10-notes'),
+    path('grade10/quizzes/', views.Grade10QuizzesView.as_view(), name='grade10-quizzes'),
 ]

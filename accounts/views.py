@@ -185,3 +185,17 @@ def video_lessons(request):
     if not request.user.is_authenticated:
         return redirect('student_login_page')
     return render(request, 'accounts/video_lessons.html')
+def grade10_portal(request):
+    if not request.user.is_authenticated:
+        return redirect('student_login_page')
+    
+    student_id = request.session.get('student_id')
+    try:
+        student = Student.objects.get(id=student_id)
+    except Student.DoesNotExist:
+        return redirect('student_login_page')
+    
+    context = {
+        'student': student,
+    }
+    return render(request, 'accounts/grade10_portal.html', context)
