@@ -20,7 +20,18 @@ urlpatterns = [
     path('students/search/', views.search_students, name='student-search'),
     
     # ==========================================
-    # PROGRESS TRACKING URLs (COMMENTED OUT - Add views later)
+    # STUDENT REGISTRATION
+    # ==========================================
+    path('students/register/', views.student_register, name='student-register'),
+    path('students/login/', views.student_login, name='student-login'),
+    
+    # ==========================================
+    # DASHBOARD API
+    # ==========================================
+    path('dashboard/', views.get_dashboard_data, name='dashboard-data'),
+    
+    # ==========================================
+    # PROGRESS TRACKING URLs
     # ==========================================
     # path('progress/', views.StudentProgressListView.as_view(), name='progress-list'),
     # path('update-progress/', views.UpdateProgressView.as_view(), name='update-progress'),
@@ -28,13 +39,13 @@ urlpatterns = [
     # path('submit-quiz/', views.SubmitQuizScoreView.as_view(), name='submit-quiz'),
     
     # ==========================================
-    # SEARCH URLs (COMMENTED OUT - Add views later)
+    # SEARCH URLs
     # ==========================================
     # path('search/', views.LessonSearchView.as_view(), name='lesson-search'),
     # path('filter-options/', views.FilterOptionsView.as_view(), name='filter-options'),
     
     # ==========================================
-    # CERTIFICATE URLs (COMMENTED OUT - Add views later)
+    # CERTIFICATE URLs
     # ==========================================
     # path('certificates/<int:student_id>/', views.StudentCertificatesView.as_view(), name='student-certificates'),
     # path('generate-certificate/', views.GenerateCertificateView.as_view(), name='generate-certificate'),
@@ -43,7 +54,7 @@ urlpatterns = [
     # path('send-progress-report/', views.SendProgressReportView.as_view(), name='send-progress-report'),
     
     # ==========================================
-    # MOBILE API URLs (COMMENTED OUT - Add views later)
+    # MOBILE API URLs
     # ==========================================
     # path('mobile/login/', views.MobileLoginView.as_view(), name='mobile-login'),
     # path('mobile/dashboard/<int:student_id>/', views.MobileDashboardView.as_view(), name='mobile-dashboard'),
@@ -54,7 +65,7 @@ urlpatterns = [
     # path('mobile/notifications/<int:student_id>/', views.MobileNotificationsView.as_view(), name='mobile-notifications'),
     
     # ==========================================
-    # QUIZ SYSTEM URLs (COMMENTED OUT - Add views later)
+    # QUIZ SYSTEM URLs
     # ==========================================
     # path('quizzes/', views.QuizListView.as_view(), name='quiz-list'),
     # path('quiz/lesson/<int:lesson_id>/', views.LessonQuizView.as_view(), name='lesson-quiz'),
@@ -63,7 +74,7 @@ urlpatterns = [
     # path('quiz/result/<int:attempt_id>/', views.QuizResultView.as_view(), name='quiz-result'),
     
     # ==========================================
-    # NOTES URLs (COMMENTED OUT - Add views later)
+    # NOTES URLs
     # ==========================================
     # path('notes/', views.NoteListView.as_view(), name='note-list'),
     # path('notes/<int:pk>/', views.NoteDetailView.as_view(), name='note-detail'),
@@ -73,7 +84,7 @@ urlpatterns = [
     # path('notes/stats/', views.NoteStatsView.as_view(), name='note-stats'),
     
     # ==========================================
-    # GRADE 10 URLs (COMMENTED OUT - Add views later)
+    # GRADE 10 URLs
     # ==========================================
     # path('grade10/dashboard/<int:student_id>/', views.Grade10DashboardView.as_view(), name='grade10-dashboard'),
     # path('grade10/subjects/', views.Grade10SubjectsView.as_view(), name='grade10-subjects'),
