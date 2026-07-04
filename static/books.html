@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Books - Theta Tutorial Center</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 10px; }
+        h1 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #3498db; color: white; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #ddd; }
+        tr:hover { background: #f5f5f5; }
+        .back { color: #3498db; text-decoration: none; display: inline-block; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📖 Library Books</h1>
+        <div id="booksList">Loading...</div>
+        <a href="index.html" class="back">← Back to Dashboard</a>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/library/api/books/';
+        
+        fetch(API_URL)
+            .then(res => res.json())
+            .then(data => {
+                let html = `<table>
+                    <tr><th>Title</th><th>Author</th><th>ISBN</th><th>Available</th></tr>`;
+                
+                if (data.length === 0) {
+                    html += `<tr><td colspan="4" style="text-align:center;">No books found</td></tr>`;
+                } else {
+                    data.forEach(book => {
+                        html += `<tr>
+                            <td>${book.title}</td>
+                            <td>${book.author || 'N/A'}</td>
+                            <td>${book.isbn || 'N/A'}</td>
+                            <td>${book.available_quantity || book.quantity || 0}</td>
+                        </tr>`;
+                    });
+                }
+                html += `</table>`;
+                document.getElementById('booksList').innerHTML = html;
+            })
+            .catch(err => {
+                document.getElementById('booksList').innerHTML = '<p>Error loading books. Make sure the server is running.</p>';
+            });
+    </script>
+</body>
+</html>

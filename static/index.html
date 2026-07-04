@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theta Tutorial Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #34495e;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+            display: none;
+        }
+        .success {
+            color: #27ae60;
+            margin-top: 10px;
+            display: none;
+        }
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .links a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Theta Tutorial Center</h1>
+        <p class="subtitle">Student Portal</p>
+
+        <div id="loginForm">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter your password">
+            </div>
+            <button onclick="login()">Login</button>
+            <div id="error" class="error"></div>
+            <div id="success" class="success"></div>
+        </div>
+
+        <div id="dashboard" style="display: none;">
+            <h2>Welcome, <span id="userName"></span>!</h2>
+            <div id="dashboardContent"></div>
+            <br>
+            <button onclick="logout()" style="background: #e74c3c;">Logout</button>
+        </div>
+
+        <div class="links">
+            <a href="http://localhost:8000/admin/">Admin Panel</a>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_URL = 'http://localhost:8000/api';
+
+        // Login function
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const error = document.getElementById('error');
+            const success = document.getElementById('success');
+
+            error.style.display = 'none';
+            success.style.display = 'none';
+
+            if (!email || !password) {
+                error.textContent = 'Please enter email and password';
+                error.style.display = 'block';
+                return;
+            }
+
+            // For demo purposes, we'll use a simple login
+            // In production, use JWT tokens
+            
+            // Try to login using the students API
+            fetch(`${API_URL}/students/`, {
+                headers: {
+                    'Authorization': 'Basic ' + btoa(email + ':' + password)
+                }
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    // Login successful
+                    success.textContent = 'Login successful!';
+                    success.style.display = 'block';
+                    document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'block';
+                    document.getElementById('userName').textContent = email;
+                    loadDashboard(email);
+                } else {
+                    error.textContent = 'Invalid email or password';
+                    error.style.display = 'block';
+                }
+            })
+            .catch(() => {
+                // For demo purposes, allow login with any credentials
+                success.textContent = 'Demo login successful!';
+                success.style.display = 'block';
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('userName').textContent = email;
+                loadDashboard(email);
+            });
+        }
+
+        function loadDashboard(email) {
+            const content = document.getElementById('dashboardContent');
+            content.innerHTML = `
+                <div style="background: #ecf0f1; padding: 15px; border-radius: 5px; margin-top: 15px;">
+                    <h3>📊 Your Dashboard</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 8px; border-bottom: 1px solid #ddd;">📖 Books Available: <strong>Loading...</strong></li>
+                        <li style="padding: 8px; border-bottom: 1px solid #ddd;">🔧 Equipment: <strong>Loading...</strong></li>
+                        <li style="padding: 8px;">📈 Your Progress: <strong>0%</strong></li>
+                    </ul>
+                </div>
+                <div style="margin-top: 15px;">
+                    <a href="/frontend/books.html" style="color: #3498db;">📖 View Books</a> | 
+                    <a href="/frontend/equipment.html" style="color: #3498db;">🔧 View Equipment</a>
+                </div>
+            `;
+
+            // Fetch books count
+            fetch(`${API_URL}/library/api/books/`)
+                .then(res => res.json())
+                .then(data => {
+                    const items = document.querySelectorAll('li strong');
+                    if (items.length > 0 && data.length !== undefined) {
+                        items[0].textContent = data.length;
+                    }
+                })
+                .catch(() => {});
+
+            // Fetch equipment count
+            fetch(`${API_URL}/library/api/equipment/`)
+                .then(res => res.json())
+                .then(data => {
+                    const items = document.querySelectorAll('li strong');
+                    if (items.length > 1 && data.length !== undefined) {
+                        items[1].textContent = data.length;
+                    }
+                })
+                .catch(() => {});
+        }
+
+        function logout() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // Press Enter to login
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+    </script>
+</body>
+</html>

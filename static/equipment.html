@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Equipment - Theta Tutorial Center</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 10px; }
+        h1 { color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #2ecc71; color: white; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #ddd; }
+        tr:hover { background: #f5f5f5; }
+        .available { color: #27ae60; font-weight: bold; }
+        .in-use { color: #f39c12; font-weight: bold; }
+        .maintenance { color: #e74c3c; font-weight: bold; }
+        .back { color: #3498db; text-decoration: none; display: inline-block; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Lab Equipment</h1>
+        <div id="equipmentList">Loading...</div>
+        <a href="index.html" class="back">← Back to Dashboard</a>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/api/library/api/equipment/';
+        
+        fetch(API_URL)
+            .then(res => res.json())
+            .then(data => {
+                let html = `<table>
+                    <tr><th>Name</th><th>Model</th><th>Serial Number</th><th>Status</th></tr>`;
+                
+                if (data.length === 0) {
+                    html += `<tr><td colspan="4" style="text-align:center;">No equipment found</td></tr>`;
+                } else {
+                    data.forEach(item => {
+                        let statusClass = 'available';
+                        if (item.status === 'in_use') statusClass = 'in-use';
+                        if (item.status === 'under_maintenance') statusClass = 'maintenance';
+                        
+                        html += `<tr>
+                            <td>${item.name}</td>
+                            <td>${item.model || 'N/A'}</td>
+                            <td>${item.serial_number || 'N/A'}</td>
+                            <td class="${statusClass}">${item.status || 'available'}</td>
+                        </tr>`;
+                    });
+                }
+                html += `</table>`;
+                document.getElementById('equipmentList').innerHTML = html;
+            })
+            .catch(err => {
+                document.getElementById('equipmentList').innerHTML = '<p>Error loading equipment. Make sure the server is running.</p>';
+            });
+    </script>
+</body>
+</html>

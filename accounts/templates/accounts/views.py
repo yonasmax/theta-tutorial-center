@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
-from django.db.models import Q, Count, Avg, Sum
+from django.db.models import Q
 from .models import Student
 from accounts.models import User
 from .serializers import (
@@ -226,52 +226,15 @@ class StudentDeleteView(DestroyAPIView):
 
 
 # ============================================
-# STUDENT STATS VIEW
-# ============================================
-
-class StudentStatsView(APIView):
-    """Get student statistics (Admin only)"""
-    permission_classes = [IsAdminUser]
-    
-    def get(self, request):
-        """Get statistics about students"""
-        try:
-            total_students = Student.objects.count()
-            active_students = Student.objects.filter(status='active').count()
-            inactive_students = Student.objects.filter(status='inactive').count()
-            
-            # Get recent students (last 7 days)
-            from django.utils import timezone
-            from datetime import timedelta
-            seven_days_ago = timezone.now() - timedelta(days=7)
-            new_students = Student.objects.filter(created_at__gte=seven_days_ago).count()
-            
-            return Response({
-                'status': 'success',
-                'data': {
-                    'total_students': total_students,
-                    'active_students': active_students,
-                    'inactive_students': inactive_students,
-                    'new_students_last_7_days': new_students,
-                }
-            }, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-
-# ============================================
 # BULK UPLOAD VIEW
 # ============================================
 
 class StudentBulkUploadView(APIView):
-    """Bulk upload students via CSV"""
+    """Bulk upload students via CSV/Excel"""
     permission_classes = [IsAdminUser]
     
     def post(self, request):
-        """Upload students in bulk from CSV"""
+        """Upload students in bulk"""
         try:
             file = request.FILES.get('file')
             if not file:
@@ -281,9 +244,9 @@ class StudentBulkUploadView(APIView):
                 )
             
             # Check file extension
-            if not file.name.endswith('.csv'):
+            if not file.name.endswith(('.csv', '.xlsx', '.xls')):
                 return Response(
-                    {'error': 'File must be CSV format'},
+                    {'error': 'File must be CSV or Excel format'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
@@ -291,60 +254,57 @@ class StudentBulkUploadView(APIView):
             import csv
             import io
             
-            decoded_file = file.read().decode('utf-8')
-            io_string = io.StringIO(decoded_file)
-            reader = csv.reader(io_string)
-            
-            created_count = 0
-            errors = []
-            
-            # Skip header row
-            next(reader, None)
-            
-            for row in reader:
-                try:
-                    if len(row) < 3:
-                        errors.append(f'Row has insufficient data: {row}')
-                        continue
-                    
-                    email = row[0].strip()
-                    first_name = row[1].strip()
-                    last_name = row[2].strip()
-                    student_id = row[3].strip() if len(row) > 3 else None
-                    password = 'student123'
-                    
-                    # Check if user already exists
-                    if User.objects.filter(email=email).exists():
-                        errors.append(f'User with email {email} already exists')
-                        continue
-                    
-                    # Create user
-                    user = User.objects.create_user(
-                        email=email,
-                        password=password,
-                        first_name=first_name,
-                        last_name=last_name,
-                        role='student'
-                    )
-                    
-                    # Create student
-                    if student_id:
-                        Student.objects.create(
-                            user=user,
-                            student_id=student_id
+            if file.name.endswith('.csv'):
+                decoded_file = file.read().decode('utf-8')
+                io_string = io.StringIO(decoded_file)
+                reader = csv.reader(io_string)
+                
+                created_count = 0
+                errors = []
+                
+                # Skip header row
+                next(reader, None)
+                
+                for row in reader:
+                    try:
+                        email = row[0]
+                        first_name = row[1]
+                        last_name = row[2]
+                        student_id = row[3] if len(row) > 3 else None
+                        password = f'default123'
+                        
+                        # Create user
+                        user = User.objects.create_user(
+                            email=email,
+                            password=password,
+                            first_name=first_name,
+                            last_name=last_name,
+                            role='student'
                         )
-                    else:
-                        Student.objects.create(user=user)
-                    
-                    created_count += 1
-                except Exception as e:
-                    errors.append(f'Error with row {row}: {str(e)}')
+                        
+                        # Create student
+                        if student_id:
+                            Student.objects.create(
+                                user=user,
+                                student_id=student_id
+                            )
+                        else:
+                            Student.objects.create(user=user)
+                        
+                        created_count += 1
+                    except Exception as e:
+                        errors.append(f'Error with row {row}: {str(e)}')
+                
+                return Response({
+                    'status': 'success',
+                    'message': f'Successfully created {created_count} students',
+                    'errors': errors
+                }, status=status.HTTP_200_OK)
             
             return Response({
-                'status': 'success',
-                'message': f'Successfully created {created_count} students',
-                'errors': errors
-            }, status=status.HTTP_200_OK)
+                'error': 'File format not supported yet',
+                'supported_formats': ['csv']
+            }, status=status.HTTP_400_BAD_REQUEST)
             
         except Exception as e:
             return Response(

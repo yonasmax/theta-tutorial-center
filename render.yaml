@@ -2,19 +2,13 @@ services:
   - type: web
     name: theta-tutorial-center
     runtime: python
-    buildCommand: ./build.sh
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
     startCommand: gunicorn theta_backend.wsgi:application
     envVars:
-      - key: SECRET_KEY
-        generateValue: true
       - key: DJANGO_SETTINGS_MODULE
         value: theta_backend.settings
-      - key: DEBUG
-        value: false
-    plan: free
-
-databases:
-  - name: theta-db
-    plan: free
-    databaseName: theta_db
-    user: theta_user
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.10.0
